@@ -41,9 +41,11 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.MotionEvent.PointerCoords;
 
+import com.github.uiautomator.stub.exceptions.InvalidCoordinatesException;
 import com.github.uiautomator.stub.exceptions.NotImplementedException;
 import com.github.uiautomator.stub.exceptions.UiAutomator2Exception;
 import com.github.uiautomator.stub.helper.NotificationListener;
+import com.github.uiautomator.stub.helper.PositionHelper;
 import com.github.uiautomator.stub.helper.ReflectionUtils;
 import com.github.uiautomator.stub.helper.XMLHierarchy;
 import com.github.uiautomator.stub.watcher.ClickUiObjectWatcher;
@@ -74,6 +76,7 @@ public class AutomatorServiceImpl implements AutomatorService {
         this.uiAutomation = InstrumentationRegistry.getInstrumentation().getUiAutomation();
         Device.getInstance().init(device, uiAutomation);
     }
+
     /**
      * It's to test if the service is alive.
      *
@@ -139,9 +142,9 @@ public class AutomatorServiceImpl implements AutomatorService {
 
     @Override
     public boolean swipePoints(int[] segments, int segmentSteps) {
-        android.graphics.Point[] points = new android.graphics.Point[segments.length/2];
-        for (int i = 0; i < segments.length/2; i++) {
-            points[i] = new android.graphics.Point(segments[2*i], segments[2*i+1]);
+        android.graphics.Point[] points = new android.graphics.Point[segments.length / 2];
+        for (int i = 0; i < segments.length / 2; i++) {
+            points[i] = new android.graphics.Point(segments[2 * i], segments[2 * i + 1]);
         }
         return device.swipe(points, segmentSteps);
     }
@@ -192,18 +195,16 @@ public class AutomatorServiceImpl implements AutomatorService {
 //        }
 //        return null;
 //    }
-
     @Override
     public String dumpWindowHierarchy(boolean compressed) {
         try {
             ReflectionUtils.clearAccessibilityCache();
             return XMLHierarchy.getRawStringHierarchy();
-        }catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             throw new UiAutomator2Exception(e);
         }
     }
-
 
 
     /**
@@ -522,7 +523,7 @@ public class AutomatorServiceImpl implements AutomatorService {
     public void clearTextField(Selector obj) throws UiObjectNotFoundException {
         try {
             obj.toUiObject2().clear();
-        }catch(NullPointerException e){
+        } catch (NullPointerException e) {
             device.findObject(obj.toUiSelector()).clearTextField();
         }
 
@@ -554,11 +555,11 @@ public class AutomatorServiceImpl implements AutomatorService {
      */
     @Override
     public boolean setText(Selector obj, String text) throws UiObjectNotFoundException {
-        try{
+        try {
             obj.toUiObject2().click();
             obj.toUiObject2().setText(text);
             return true;
-        }catch(NullPointerException e){
+        } catch (NullPointerException e) {
             return device.findObject(obj.toUiSelector()).setText(text);
         }
     }
@@ -710,8 +711,8 @@ public class AutomatorServiceImpl implements AutomatorService {
      */
     @Override
     public boolean exist(Selector obj) {
-        if (obj.getChildOrSibling().length==0&&obj.toBySelector()!=null)
-            return device.wait(Until.hasObject(obj.toBySelector()),0L);
+        if (obj.getChildOrSibling().length == 0 && obj.toBySelector() != null)
+            return device.wait(Until.hasObject(obj.toBySelector()), 0L);
         return device.findObject(obj.toUiSelector()).exists();
     }
 
@@ -815,24 +816,25 @@ public class AutomatorServiceImpl implements AutomatorService {
     public boolean gesture(Selector obj, Point startPoint1, Point startPoint2, Point startPoint3, Point endPoint1, Point endPoint2, Point endPoint3, int steps) throws UiObjectNotFoundException, NotImplementedException {
         return gesture(device.findObject(obj.toUiSelector()), startPoint1, startPoint2, startPoint3, endPoint1, endPoint2, endPoint3, steps);
     }
+
     //TODO other way to inject multi pointers
-    private boolean gesture(UiObject obj, Point startPoint1, Point startPoint2, Point startPoint3, Point endPoint1, Point endPoint2,  Point endPoint3, int steps) throws UiObjectNotFoundException, NotImplementedException {
+    private boolean gesture(UiObject obj, Point startPoint1, Point startPoint2, Point startPoint3, Point endPoint1, Point endPoint2, Point endPoint3, int steps) throws UiObjectNotFoundException, NotImplementedException {
         //PointerCoords[] pcs = new PointerCoords[3];
-        PointerCoords[] points1 = new PointerCoords[steps+2];
-        PointerCoords[] points2 = new PointerCoords[steps+2];
-        PointerCoords[] points3 = new PointerCoords[steps+2];
+        PointerCoords[] points1 = new PointerCoords[steps + 2];
+        PointerCoords[] points2 = new PointerCoords[steps + 2];
+        PointerCoords[] points3 = new PointerCoords[steps + 2];
         float eventX1 = startPoint1.getX();
         float eventY1 = startPoint1.getY();
         float eventX2 = startPoint2.getX();
         float eventY2 = startPoint2.getY();
         float eventX3 = startPoint3.getX();
         float eventY3 = startPoint3.getY();
-        float offY1 = (endPoint1.getY() - eventY1)/steps;
-        float offY2 = (endPoint2.getY() - eventY2)/steps;
-        float offY3 = (endPoint3.getY() - eventY3)/steps;
-        float offX1 = (endPoint1.getX() - eventX1)/steps;
-        float offX2 = (endPoint2.getX() - eventX2)/steps;
-        float offX3 = (endPoint3.getX() - eventX3)/steps;
+        float offY1 = (endPoint1.getY() - eventY1) / steps;
+        float offY2 = (endPoint2.getY() - eventY2) / steps;
+        float offY3 = (endPoint3.getY() - eventY3) / steps;
+        float offX1 = (endPoint1.getX() - eventX1) / steps;
+        float offX2 = (endPoint2.getX() - eventX2) / steps;
+        float offX3 = (endPoint3.getX() - eventX3) / steps;
 
         for (int i = 0; i < steps + 1; i++) {
             PointerCoords p1 = new PointerCoords();
@@ -954,27 +956,28 @@ public class AutomatorServiceImpl implements AutomatorService {
     /**
      * Performs the swipe up/down/left/right action on the UiObject
      *
-     * @param obj   the target ui object.
-     * @param dir   "u"/"up", "d"/"down", "l"/"left", "r"/"right"
+     * @param obj     the target ui object.
+     * @param dir     "u"/"up", "d"/"down", "l"/"left", "r"/"right"
      * @param percent expect value: percent >= 0.0F && percent <= 1.0F,The length of the swipe as a percentage of this object's size.
-     * @param steps indicates the number of injected move steps into the system. Steps are injected about 5ms apart. So a 100 steps may take about 1/2 second to complete.
+     * @param steps   indicates the number of injected move steps into the system. Steps are injected about 5ms apart. So a 100 steps may take about 1/2 second to complete.
      * @return true of successful
      * @throws UiObjectNotFoundException
      */
     @Override
-    public boolean swipe(Selector obj, String dir,float percent, int steps) throws UiObjectNotFoundException {
-        if(obj.toUiObject2() == null){
+    public boolean swipe(Selector obj, String dir, float percent, int steps) throws UiObjectNotFoundException {
+        if (obj.toUiObject2() == null) {
             return swipe(device.findObject(obj.toUiSelector()), dir, steps);
         }
         return swipe(obj.toUiObject2(), dir, percent, steps);
     }
 
-    private boolean swipe(UiObject2 item, String dir,float percent, int steps) throws UiObjectNotFoundException {
+    private boolean swipe(UiObject2 item, String dir, float percent, int steps) throws UiObjectNotFoundException {
         dir = dir.toLowerCase();
-        if ("u".equals(dir) || "up".equals(dir)) item.swipe(Direction.UP,percent,steps);
-        else if ("d".equals(dir) || "down".equals(dir)) item.swipe(Direction.DOWN,percent,steps);
-        else if ("l".equals(dir) || "left".equals(dir)) item.swipe(Direction.LEFT,percent,steps);
-        else if ("r".equals(dir) || "right".equals(dir)) item.swipe(Direction.RIGHT,percent,steps);
+        if ("u".equals(dir) || "up".equals(dir)) item.swipe(Direction.UP, percent, steps);
+        else if ("d".equals(dir) || "down".equals(dir)) item.swipe(Direction.DOWN, percent, steps);
+        else if ("l".equals(dir) || "left".equals(dir)) item.swipe(Direction.LEFT, percent, steps);
+        else if ("r".equals(dir) || "right".equals(dir))
+            item.swipe(Direction.RIGHT, percent, steps);
         return true;
     }
 
@@ -987,8 +990,8 @@ public class AutomatorServiceImpl implements AutomatorService {
      */
     @Override
     public boolean waitForExists(Selector obj, long timeout) {
-        if (obj.getChildOrSibling().length==0&&obj.checkBySelectorNull(obj)==false)
-            return device.wait(Until.hasObject(obj.toBySelector()),timeout);
+        if (obj.getChildOrSibling().length == 0 && obj.checkBySelectorNull(obj) == false)
+            return device.wait(Until.hasObject(obj.toBySelector()), timeout);
         return device.findObject(obj.toUiSelector()).waitForExists(timeout);
     }
 
@@ -1001,8 +1004,8 @@ public class AutomatorServiceImpl implements AutomatorService {
      */
     @Override
     public boolean waitUntilGone(Selector obj, long timeout) {
-        if (obj.getChildOrSibling().length==0&&obj.checkBySelectorNull(obj)==false)
-            return device.wait(Until.gone(obj.toBySelector()),timeout);
+        if (obj.getChildOrSibling().length == 0 && obj.checkBySelectorNull(obj) == false)
+            return device.wait(Until.gone(obj.toBySelector()), timeout);
         return device.findObject(obj.toUiSelector()).waitUntilGone(timeout);
     }
 
@@ -1519,7 +1522,7 @@ public class AutomatorServiceImpl implements AutomatorService {
      * @throws UiObjectNotFoundException
      */
     @Override
-    public boolean gesture(String obj, Point startPoint1, Point startPoint2,  Point startPoint3, Point endPoint1, Point endPoint2, Point endPoint3, int steps) throws UiObjectNotFoundException, NotImplementedException {
+    public boolean gesture(String obj, Point startPoint1, Point startPoint2, Point startPoint3, Point endPoint1, Point endPoint2, Point endPoint3, int steps) throws UiObjectNotFoundException, NotImplementedException {
         return gesture(getUiObject(obj), startPoint1, startPoint2, startPoint3, endPoint1, endPoint2, endPoint3, steps);
     }
 
@@ -1620,7 +1623,7 @@ public class AutomatorServiceImpl implements AutomatorService {
     public List<ObjInfo> finds(Selector obj) throws NotImplementedException {
         List<ObjInfo> objs = new ArrayList<>();
         List<UiObject2> obj2s = device.findObjects(obj.toBySelector());
-        for(int i=0;i<obj2s.size();i++){
+        for (int i = 0; i < obj2s.size(); i++) {
             objs.add(ObjInfo.getObjInfo(obj2s.get(i)));
         }
         return objs;
@@ -1628,17 +1631,37 @@ public class AutomatorServiceImpl implements AutomatorService {
 
     @Override
     public String toast(String switchStatus) throws NotImplementedException {
-        if("on".equalsIgnoreCase(switchStatus)){
+        if ("on".equalsIgnoreCase(switchStatus)) {
             NotificationListener.getInstance().start();
-        }else if("off".equalsIgnoreCase(switchStatus)){
+        } else if ("off".equalsIgnoreCase(switchStatus)) {
             NotificationListener.getInstance().stop();
             List<CharSequence> toastMsg = NotificationListener.getInstance().getToastMSGs();
             StringBuilder sb = new StringBuilder();
-            for(CharSequence tmp:toastMsg){
+            for (CharSequence tmp : toastMsg) {
                 sb.append(tmp.toString());
             }
             return sb.toString();
         }
         return null;
     }
+
+    @Override
+    public boolean touchDown(float x, float y) throws InvalidCoordinatesException, UiObjectNotFoundException {
+        Point pos = PositionHelper.getDeviceAbsPos(new Point(x,y));
+        return Device.getInstance().getInteractionController().touchDown(pos.x.intValue(),pos.y.intValue());
+    }
+
+    @Override
+    public boolean touchUp(float x, float y) throws InvalidCoordinatesException, UiObjectNotFoundException {
+        Point pos = PositionHelper.getDeviceAbsPos(new Point(x,y));
+        return Device.getInstance().getInteractionController().touchUp(pos.x.intValue(),pos.y.intValue());
+    }
+
+    @Override
+    public boolean moveTo(float x, float y) throws InvalidCoordinatesException, UiObjectNotFoundException {
+        Point pos = PositionHelper.getDeviceAbsPos(new Point(x,y));
+        return Device.getInstance().getInteractionController().touchMove(pos.x.intValue(),pos.y.intValue());
+    }
+
+
 }

@@ -26,11 +26,11 @@ package com.github.uiautomator.stub;
 import android.os.RemoteException;
 import android.support.test.uiautomator.UiObjectNotFoundException;
 
+import com.github.uiautomator.stub.exceptions.InvalidCoordinatesException;
 import com.github.uiautomator.stub.exceptions.NotImplementedException;
 import com.github.uiautomator.stub.exceptions.UiAutomator2Exception;
 import com.googlecode.jsonrpc4j.JsonRpcError;
 import com.googlecode.jsonrpc4j.JsonRpcErrors;
-
 import java.util.List;
 
 public interface AutomatorService {
@@ -937,4 +937,27 @@ public interface AutomatorService {
      */
     @JsonRpcErrors({@JsonRpcError(exception=NotImplementedException.class, code=ERROR_CODE_BASE)})
     String toast(String switchStatus) throws NotImplementedException;
+
+    /**
+     * touchdown.
+     * @throws UiObjectNotFoundException
+     */
+    @JsonRpcErrors({@JsonRpcError(exception=UiObjectNotFoundException.class, code=ERROR_CODE_BASE-2), @JsonRpcError(exception=InvalidCoordinatesException.class, code=ERROR_CODE_BASE-3)})
+    boolean touchDown(float x, float y) throws NotImplementedException, InvalidCoordinatesException, UiObjectNotFoundException;
+
+    /**
+     * TouchUp.
+     * the TouchUp pos.
+     * @throws UiObjectNotFoundException
+     */
+    @JsonRpcErrors({@JsonRpcError(exception=UiObjectNotFoundException.class, code=ERROR_CODE_BASE-2), @JsonRpcError(exception=InvalidCoordinatesException.class, code=ERROR_CODE_BASE-3)})
+    boolean touchUp(float x, float y) throws NotImplementedException, InvalidCoordinatesException, UiObjectNotFoundException;
+
+    /**
+     * MoveTo.
+     *  the MoveTo position
+     * @throws UiObjectNotFoundException
+     */
+    @JsonRpcErrors({@JsonRpcError(exception=UiObjectNotFoundException.class, code=ERROR_CODE_BASE-2), @JsonRpcError(exception=InvalidCoordinatesException.class, code=ERROR_CODE_BASE-3)})
+    boolean moveTo(float x, float y) throws NotImplementedException, InvalidCoordinatesException, UiObjectNotFoundException;
 }
