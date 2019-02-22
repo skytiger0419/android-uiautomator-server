@@ -28,6 +28,8 @@ import android.support.test.uiautomator.UiDevice;
 
 import com.googlecode.jsonrpc4j.JsonRpcServer;
 
+import org.json.JSONObject;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -56,7 +58,6 @@ public class AutomatorHttpServer extends NanoHTTPD {
                           Map<String, String> headers, Map<String, String> params,
                           Map<String, String> files) {
         Log.d(String.format("URI: %s, Method: %s, Header: %s, params, %s, files: %s", uri, method, headers, params, files));
-
         if ("/stop".equals(uri)) {
             stop();
             return new Response("Server stopped!!!");
@@ -86,21 +87,43 @@ public class AutomatorHttpServer extends NanoHTTPD {
         } else if (router.containsKey(uri)) {
             JsonRpcServer jsonRpcServer = router.get(uri);
             ByteArrayInputStream is = null;
-            if (params.get("NanoHttpd.QUERY_STRING") != null)
+            String remoteMethod = null;
+            if (params.get("NanoHttpd.QUERY_STRING") != null) {
                 is = new ByteArrayInputStream(params.get("NanoHttpd.QUERY_STRING").getBytes());
-            else if (files.get("postData") != null)
-                is = new ByteArrayInputStream(files.get("postData").getBytes());
-            else
+            }else if (files.get("postData") != null) {
+                String tmp = files.get("postData");
+                JSONObject json = getJson(tmp);
+                if("screenshot".equals(json.optString("method"))){
+                    remoteMethod = "screenshot";
+                }
+                is = new ByteArrayInputStream(tmp.getBytes());
+            }else {
                 return new Response(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, "Invalid http post data!");
+            }
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             try {
                 jsonRpcServer.handle(is, os);
+                if(remoteMethod != null && remoteMethod.equals("screenshot")){
+                    JSONObject json = getJson(new String(os.toByteArray()));
+                    if(json != null && json.optString("result",null) !=null){
+                        return new Response(Response.Status.OK, "image/png", new FileInputStream(json.optString("result")));
+                    }
+                }
                 return new Response(Response.Status.OK, "application/json", new ByteArrayInputStream(os.toByteArray()));
             } catch (IOException e) {
                 return new Response(Response.Status.INTERNAL_ERROR, MIME_PLAINTEXT, "Internal Server Error!!!");
             }
         } else
             return new Response(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "Not Found!!!");
+    }
+
+    private JSONObject getJson(String obj){
+        try{
+            return new JSONObject(obj);
+        }catch (Exception e){
+
+        }
+        return null;
     }
 
 }

@@ -960,4 +960,12 @@ public interface AutomatorService {
      */
     @JsonRpcErrors({@JsonRpcError(exception=UiObjectNotFoundException.class, code=ERROR_CODE_BASE-2), @JsonRpcError(exception=InvalidCoordinatesException.class, code=ERROR_CODE_BASE-3)})
     boolean moveTo(float x, float y) throws NotImplementedException, InvalidCoordinatesException, UiObjectNotFoundException;
+
+    /**
+     * screenshot.
+     *  get object screenshot
+     * @throws UiObjectNotFoundException
+     */
+    @JsonRpcErrors({@JsonRpcError(exception=UiObjectNotFoundException.class, code=ERROR_CODE_BASE-2), @JsonRpcError(exception=InvalidCoordinatesException.class, code=ERROR_CODE_BASE-3)})
+    String screenshot(Selector obj,float scale, int quality) throws NotImplementedException, UiObjectNotFoundException;
 }

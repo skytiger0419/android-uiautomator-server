@@ -24,6 +24,8 @@
 package com.github.uiautomator.stub;
 
 import android.app.UiAutomation;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.support.test.InstrumentationRegistry;
@@ -52,6 +54,9 @@ import com.github.uiautomator.stub.watcher.ClickUiObjectWatcher;
 import com.github.uiautomator.stub.watcher.PressKeysWatcher;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -1661,6 +1666,35 @@ public class AutomatorServiceImpl implements AutomatorService {
     public boolean moveTo(float x, float y) throws InvalidCoordinatesException, UiObjectNotFoundException {
         Point pos = PositionHelper.getDeviceAbsPos(new Point(x,y));
         return Device.getInstance().getInteractionController().touchMove(pos.x.intValue(),pos.y.intValue());
+    }
+
+    @Override
+    public String screenshot(Selector obj, float scale, int quality) throws NotImplementedException, UiObjectNotFoundException {
+        FileOutputStream out = null;
+        android.graphics.Rect rect = device.findObject(obj.toUiSelector()).getBounds();
+        String filepath = this.takeScreenshot("screenshot.png",scale, quality);
+        try{
+            File targetFile = new File(filepath);
+            if(targetFile.exists()) {
+                Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(targetFile));
+                Bitmap dest = Bitmap.createBitmap(bitmap, rect.left, rect.top,
+                        rect.width(), rect.height());
+                out = new FileOutputStream(targetFile);
+                dest.compress(Bitmap.CompressFormat.PNG, 100, out);
+                out.flush();
+            }
+        }catch(IOException e){
+
+        } finally{
+            try{
+                if(out != null){
+                    out.close();
+                }
+            }catch (Exception e){
+
+            }
+        }
+        return filepath;
     }
 
 
