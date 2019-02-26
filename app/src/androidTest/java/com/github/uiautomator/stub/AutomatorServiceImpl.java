@@ -78,7 +78,7 @@ public class AutomatorServiceImpl implements AutomatorService {
     public AutomatorServiceImpl() {
 
         device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
-        this.uiAutomation = InstrumentationRegistry.getInstrumentation().getUiAutomation();
+        uiAutomation = InstrumentationRegistry.getInstrumentation().getUiAutomation();
         Device.getInstance().init(device, uiAutomation);
     }
 
@@ -1620,7 +1620,11 @@ public class AutomatorServiceImpl implements AutomatorService {
      */
     @Override
     public ConfiguratorInfo setConfigurator(ConfiguratorInfo info) throws NotImplementedException {
-        ConfiguratorInfo.setConfigurator(info);
+        if(info.isFlag()){
+            ConfiguratorInfo.restore();
+        }else{
+            ConfiguratorInfo.setConfigurator(info);
+        }
         return new ConfiguratorInfo();
     }
 

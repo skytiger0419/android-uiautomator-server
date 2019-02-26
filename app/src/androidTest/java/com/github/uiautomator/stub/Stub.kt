@@ -49,9 +49,9 @@ public class Stub {
 
     @Before
     public fun setUp() {
+        UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).wakeUp()
         server.route("/jsonrpc/0", JsonRpcServer(ObjectMapper(), AutomatorServiceImpl(), AutomatorService::class.java))
         server.start()
-        UiDevice.getInstance(InstrumentationRegistry.getInstrumentation()).wakeUp()
     }
 
     @After

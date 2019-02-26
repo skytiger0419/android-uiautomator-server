@@ -25,11 +25,8 @@ package com.github.uiautomator.stub;
 
 import android.support.test.InstrumentationRegistry;
 import android.support.test.uiautomator.UiDevice;
-
 import com.googlecode.jsonrpc4j.JsonRpcServer;
-
 import org.json.JSONObject;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -38,7 +35,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
 import fi.iki.elonen.NanoHTTPD;
 
 public class AutomatorHttpServer extends NanoHTTPD {
@@ -51,6 +47,12 @@ public class AutomatorHttpServer extends NanoHTTPD {
 
     public void route(String uri, JsonRpcServer rpc) {
         router.put(uri, rpc);
+    }
+
+    @Override
+    public void start() throws IOException {
+        super.start();
+        ConfiguratorInfo.loadConfig();
     }
 
     @Override
@@ -116,6 +118,7 @@ public class AutomatorHttpServer extends NanoHTTPD {
         } else
             return new Response(Response.Status.NOT_FOUND, MIME_PLAINTEXT, "Not Found!!!");
     }
+
 
     private JSONObject getJson(String obj){
         try{
