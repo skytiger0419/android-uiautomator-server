@@ -24,6 +24,7 @@
 package com.github.uiautomator.stub;
 
 import android.support.test.InstrumentationRegistry;
+import android.support.test.uiautomator.Configurator;
 import android.support.test.uiautomator.UiDevice;
 import com.googlecode.jsonrpc4j.JsonRpcServer;
 import org.json.JSONObject;
@@ -52,6 +53,7 @@ public class AutomatorHttpServer extends NanoHTTPD {
     @Override
     public void start() throws IOException {
         super.start();
+        Configurator.getInstance().setWaitForIdleTimeout(200);
         ConfiguratorInfo.loadConfig();
     }
 
